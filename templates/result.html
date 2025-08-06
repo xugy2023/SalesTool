@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow border-0">
+        <div class="card-header bg-gradient bg-success text-white d-flex align-items-center">
+          <i class="bi bi-check-circle me-2 fs-3"></i>
+          <h3 class="mb-0 fw-bold">导入结果反馈</h3>
+        </div>
+        <div class="card-body">
+          {% if success_count is defined and failed_count is defined %}
+          <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check2-circle me-2 fs-4"></i>
+            <div>
+              成功导入 <strong>{{ success_count }}</strong> 条客户记录。
+            </div>
+          </div>
+          {% if failed_count > 0 %}
+          <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle me-2 fs-4"></i>
+            <div>
+              有 <strong>{{ failed_count }}</strong> 条记录导入失败，请检查格式或内容。
+            </div>
+          </div>
+          {% endif %}
+          {% endif %}
+
+          <div class="mt-4">
+            <h5 class="fw-bold">📋 导入摘要</h5>
+            {% if summary %}
+              <p class="text-dark">{{ summary }}</p>
+            {% else %}
+              <p class="text-muted">没有可显示的导入摘要。</p>
+            {% endif %}
+          </div>
+          <div class="mt-4">
+            {% if transcript %}
+              <hr>
+              <div class="mt-4">
+                <h5 class="fw-bold"><i class="bi bi-file-earmark-text me-2 text-primary"></i>转写结果</h5>
+                <p class="bg-light p-3 rounded" style="white-space: pre-wrap;">{{ transcript }}</p>
+              </div>
+
+
+              <hr>
+              <h5 class="fw-bold"><i class="bi bi-graph-up-arrow text-danger me-2"></i> 分析结果</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <strong>客户名称：</strong> {{ customer or "未知客户" }}
+                </li>
+                <li class="list-group-item">
+                  <strong>销售得分：</strong> {{ feedback.score }}/100
+                </li>
+                <li class="list-group-item">
+                  {% if feedback.reason %}
+                    <p><strong>评分理由：</strong>{{ feedback.reason }}</p>
+                  {% else %}
+                    <p class="text-muted">暂无评分理由。</p>
+                  {% endif %}
+                </li>
+              </ul>
+            {% endif %}
+          </div>
+          <div class="mt-4">
+            {% if feedback.rule_details %}
+            <div class="mt-3">
+              <h6 class="fw-bold">规则匹配详情：</h6>
+              <ul>
+                {% for tag, count in feedback.rule_details.items() %}
+                  <li>{{ tag }}：{{ count }} 次</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          </div>
+
+          <div class="text-end mt-4">
+            <a href="/import_customers" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-1"></i> 返回导入页面
+            </a>
+            <a href="/dashboard" class="btn btn-success">
+              <i class="bi bi-speedometer2 me-1"></i> 查看仪表盘
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

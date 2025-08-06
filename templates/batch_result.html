@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="text-success mb-4">
+    <i class="bi bi-collection"></i> 批量分析结果
+  </h2>
+
+  {% if results %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-success">
+          <tr>
+            <th>文件名</th>
+            <th>转写内容</th>
+            <th>情绪</th>
+            <th>得分</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in results %}
+          <tr>
+            <td>{{ item.filename }}</td>
+            <td class="text-truncate" style="max-width: 250px;">{{ item.transcript }}</td>
+            <td>
+              {% if '😊' in item.transcript %}<span class="badge bg-success">正面</span>
+              {% elif '😠' in item.transcript %}<span class="badge bg-danger">负面</span>
+              {% else %}<span class="badge bg-secondary">中性</span>{% endif %}
+            </td>
+            <td>{{ item.score }}</td>
+            <td>
+              {% if item.status == '有意向' %}<span class="badge bg-success">{{ item.status }}</span>
+              {% elif item.status == '无意向' %}<span class="badge bg-danger">{{ item.status }}</span>
+              {% elif item.status == '保持联系' %}<span class="badge bg-warning text-dark">{{ item.status }}</span>
+              {% else %}<span class="badge bg-light text-muted">未知</span>{% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('profile.view_profile', filename=item.filename) }}" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-eye"></i> 查看详情
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i> 暂无分析结果。
+    </div>
+  {% endif %}
+
+  <a href="/" class="btn btn-outline-secondary mt-4">
+    <i class="bi bi-arrow-left"></i> 返回首页
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+<head>
+  <meta charset="UTF-8">
+  <title>首页 - 智能销售辅助系统</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white">
+          <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>编辑通话记录</h4>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="">
+            <div class="mb-3">
+              <label for="customer_name" class="form-label">客户姓名</label>
+              <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ record.customer_name }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="call_date" class="form-label">通话日期</label>
+              <input type="date" class="form-control" id="call_date" name="call_date" value="{{ record.call_date }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="call_summary" class="form-label">通话摘要</label>
+              <textarea class="form-control" id="call_summary" name="call_summary" rows="4" required>{{ record.call_summary }}</textarea>
+            </div>
+            <div class="mb-3">
+              <label for="intent_status" class="form-label">客户意向</label>
+              <select class="form-select" id="intent_status" name="intent_status">
+                <option value="有意向" {% if record.intent_status =='有意向' %}selected{% endif %}>有意向</option>
+                <option value="保持联系" {% if record.intent_status =='保持联系' %}selected{% endif %}>保持联系</option>
+                <option value="无意向" {% if record.intent_status =='无意向' %}selected{% endif %}>无意向</option>
+              </select>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success">保存修改</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

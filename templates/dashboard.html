@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .chart-title {
+    font-weight: 700;
+    color: #2e7d32;
+  }
+  .legend {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+</style>
+<div class="container py-5">
+  <h2 class="text-success mb-4">
+    <i class="bi bi-bar-chart"></i> 销售数据分析仪表盘
+  </h2>
+
+  <div class="row g-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="chart-title">✅ 通话评分分布</h5>
+          <canvas id="scoreChart" height="120"></canvas>
+          <div class="legend mt-2">绿色代表高分（80+），橙色为中等，红色为偏低</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="chart-title">😊 情绪占比</h5>
+          <canvas id="emotionChart" height="150"></canvas>
+          <div class="legend mt-2">从所有通话中统计情绪符号出现频率</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="chart-title">📈 情绪变化趋势</h5>
+          <canvas id="emotionTrendChart" height="150"></canvas>
+          <div class="legend mt-2">观察每次通话中积极、中性、消极的变化趋势</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="chart-title">🔑 关键词使用频率</h5>
+          <canvas id="keywordChart" height="120"></canvas>
+          <div class="legend mt-2">帮助判断销售是否使用了关键话术</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="chart-title">👤 客户画像预览</h5>
+          {% for filename in score_data.labels %}
+            <div class="border-bottom py-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  🧾 <a href="/profile/{{ filename }}" target="_blank">{{ filename }}</a>
+                </div>
+                <div>
+                  {% set status = analysis_results[filename]['status'] if 'status' in analysis_results[filename] else '' %}
+                  {% if status == '有意向' %}
+                    <span class="badge bg-success">有意向</span>
+                  {% elif status == '无意向' %}
+                    <span class="badge bg-danger">无意向</span>
+                  {% elif status == '保持联系' %}
+                    <span class="badge bg-warning text-dark">保持联系</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="mt-1 text-muted small">
+                🔢 得分：{{ score_data.values[loop.index0] }}/100
+                {% if score_data.reasons and score_data.reasons[loop.index0] %}
+                  <br>🧠 评分理由：{{ score_data.reasons[loop.index0] }}
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+          <div class="legend mt-2">点击客户名称查看个性化分析详情，状态通过关键词自动识别</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const scoreData = {{ score_data | tojson }};
+    const emotionData = {{ emotion_data | tojson }};
+    const emotionTrendData = {{ emotion_trend_data | tojson }};
+    const keywordData = {{ keyword_data | tojson }};
+
+    new Chart(document.getElementById('scoreChart'), {
+      type: 'bar',
+      data: {
+        labels: scoreData.labels,
+        datasets: [{
+          label: '评分',
+          data: scoreData.values,
+          backgroundColor: scoreData.values.map(score =>
+            score >= 80 ? '#4CAF50' : score >= 60 ? '#FFC107' : '#F44336')
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, max: 100 }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('emotionChart'), {
+      type: 'pie',
+      data: {
+        labels: emotionData.labels,
+        datasets: [{
+          label: '情绪占比',
+          data: emotionData.values,
+          backgroundColor: ['#4CAF50', '#FFC107', '#F44336']
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('emotionTrendChart'), {
+      type: 'line',
+      data: {
+        labels: emotionTrendData.labels,
+        datasets: [
+          {
+            label: '积极',
+            data: emotionTrendData.positive,
+            borderColor: '#4CAF50', backgroundColor: 'rgba(76, 175, 80, 0.2)', fill: true
+          },
+          {
+            label: '中性',
+            data: emotionTrendData.neutral,
+            borderColor: '#FFC107', backgroundColor: 'rgba(255, 193, 7, 0.2)', fill: true
+          },
+          {
+            label: '消极',
+            data: emotionTrendData.negative,
+            borderColor: '#F44336', backgroundColor: 'rgba(244, 67, 54, 0.2)', fill: true
+          }
+        ]
+      },
+      options: {
+        tension: 0.3,
+        scales: {
+          y: { beginAtZero: true, stepSize: 1 }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('keywordChart'), {
+      type: 'bar',
+      data: {
+        labels: keywordData.labels,
+        datasets: [{
+          label: '关键词次数',
+          data: keywordData.values,
+          backgroundColor: '#2196F3'
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        scales: {
+          x: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .hero-title {
+    font-size: 2.75rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #38b48b, #32a89d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+</style>
+<div class="container py-5">
+  <h1 class="mb-4 hero-title">
+    <i class="bi bi-house-door"></i> 欢迎使用销售辅助系统
+  </h1>
+  <p class="lead text-muted">请选择您要进行的操作：</p>
+
+  <div class="row row-cols-1 row-cols-md-2 g-4 mt-4">
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-success"><i class="bi bi-people"></i> 客户管理</h5>
+          <p class="card-text">添加、编辑、查看和导入客户信息。</p>
+          <a href="{{ url_for('customers.list_customers') }}" class="btn btn-outline-success">进入</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-success"><i class="bi bi-journal-text"></i> 联系记录</h5>
+          <p class="card-text">查看、添加与编辑客户联系记录。</p>
+          <a href="{{ url_for('customers.list_customers') }}" class="btn btn-outline-success">进入</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-success"><i class="bi bi-upload"></i> 语音上传</h5>
+          <p class="card-text">上传销售通话音频，进行转写和分析。</p>
+          {% if latest_summary %}
+            <p class="text-muted small mt-2">🕘 最近摘要：{{ latest_summary }}</p>
+          {% endif %}
+          <a href="{{ url_for('analysis.upload') }}" class="btn btn-outline-success">上传</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-success"><i class="bi bi-graph-up"></i> 数据分析看板</h5>
+          <p class="card-text">查看销售数据、情绪趋势、打分结果等可视化分析。</p>
+          {% if dashboard_metrics %}
+            <p class="text-muted small mt-2">
+              📊 总评分：{{ dashboard_metrics.total_score }}，平均情绪：{{ dashboard_metrics.avg_emotion }}
+            </p>
+          {% endif %}
+          <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-outline-success">查看</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title text-success"><i class="bi bi-pen"></i> 术语纠错</h5>
+          <p class="card-text">管理和测试销售术语纠错规则，提升转写质量。</p>
+          <a href="{{ url_for('terminology.manage_terminology') }}" class="btn btn-outline-success">管理</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+

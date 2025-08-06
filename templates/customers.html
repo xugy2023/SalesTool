@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+<head>
+  <meta charset="UTF-8">
+  <title>首页 - 智能销售辅助系统</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4 hero-title">
+    <i class="bi bi-people"></i> 客户管理
+  </h1>
+  <p class="lead text-muted">添加、编辑和导入客户信息，便于后续跟进与管理。</p>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="text-success"><i class="bi bi-person-plus"></i> 客户列表</h5>
+        <a href="{{ url_for('customers.add_customer') }}" class="btn btn-success"><i class="bi bi-plus-circle"></i> 添加新客户</a>
+      </div>
+
+      {% if customers %}
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead class="table-success">
+            <tr>
+              <th>姓名</th>
+              <th>联系方式</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for customer in customers %}
+            <tr>
+              <td>{{ customer.name }}</td>
+              <td>{{ customer.phone }}</td>
+              <td>
+                {% if customer.status == '有意向' %}
+                  <span class="badge bg-success">有意向</span>
+                {% elif customer.status == '无意向' %}
+                  <span class="badge bg-danger">无意向</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">保持联系</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('customers.edit_customer', id=customer.id) }}" class="btn btn-sm btn-outline-primary">编辑</a>
+                <a href="{{ url_for('customers.delete_customer', id=customer.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('确定删除此客户吗？')">删除</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-muted">暂无客户信息。</p>
+      {% endif %}
+
+      <hr class="my-4">
+      <form action="{{ url_for('customers.import_customers') }}" method="POST" enctype="multipart/form-data">
+        <label class="form-label">📥 批量导入客户 (CSV格式)：</label>
+        <div class="input-group">
+          <input type="file" class="form-control" name="file" accept=".csv" required>
+          <button class="btn btn-outline-success" type="submit">导入</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  /* 修复tab导航样式 */
+  .nav-tabs .nav-link {
+      color: #495057 !important;
+  }
+  .nav-tabs .nav-link.active {
+      color: #495057 !important;
+      background-color: #fff !important;
+      border-color: #dee2e6 #dee2e6 #fff !important;
+  }
+  .nav-tabs .nav-link:hover {
+      color: #495057 !important;
+  }
+</style>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow border-0 rounded-4">
+        <div class="card-header bg-success bg-gradient text-white d-flex justify-content-between align-items-center rounded-top px-4 py-3">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-tools fs-3 me-2"></i>
+            <h2 class="mb-0 fw-semibold">🔧 术语纠错管理</h2>
+          </div>
+          <a href="/" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-house-door"></i> 返回主页
+          </a>
+        </div>
+        <div class="card-body p-4">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="mb-4">
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'error' else 'warning' }}">{{ message }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+
+          <div class="row text-center mb-4">
+            <div class="col-md-4">
+              <div class="bg-light rounded-3 p-3">
+                <h4 class="text-success">{{ stats.total_rules }}</h4>
+                <p class="text-muted mb-0">总规则数</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="bg-light rounded-3 p-3">
+                <h4 class="text-success">{{ stats.replacement_rules }}</h4>
+                <p class="text-muted mb-0">替换规则</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="bg-light rounded-3 p-3">
+                <h4 class="text-success">{{ stats.deletion_rules }}</h4>
+                <p class="text-muted mb-0">删除规则</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab导航 -->
+          <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="manage-tab" data-bs-toggle="tab" data-bs-target="#manage" type="button" role="tab" aria-controls="manage" aria-selected="true">
+                管理规则
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add" type="button" role="tab" aria-controls="add" aria-selected="false">
+                添加规则
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="batch-tab" data-bs-toggle="tab" data-bs-target="#batch" type="button" role="tab" aria-controls="batch" aria-selected="false">
+                批量操作
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="test-tab" data-bs-toggle="tab" data-bs-target="#test" type="button" role="tab" aria-controls="test" aria-selected="false">
+                测试纠错
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="mainTabsContent">
+            <div class="tab-pane fade show active" id="manage" role="tabpanel" aria-labelledby="manage-tab">
+              <div class="mb-3">
+                <input type="text" class="form-control" id="searchInput" placeholder="搜索规则..." onkeyup="searchRules()">
+              </div>
+              <table class="table table-bordered table-striped" id="rulesTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>错误词汇</th>
+                    <th>正确词汇</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for wrong_term, correct_term in corrections.items() %}
+                  <tr>
+                    <td>{{ wrong_term }}</td>
+                    <td>{{ correct_term if correct_term else '(删除)' }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-danger me-1" onclick="deleteRule('{{ wrong_term }}')">删除</button>
+                      <button class="btn btn-sm btn-outline-secondary" onclick="editRule('{{ wrong_term }}', '{{ correct_term }}')">编辑</button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="tab-pane fade" id="add" role="tabpanel" aria-labelledby="add-tab">
+              <form action="{{ url_for('terminology.add_terminology') }}" method="post" class="row g-3">
+                <div class="col-md-6">
+                  <label for="wrong_term" class="form-label">错误词汇</label>
+                  <input type="text" class="form-control" id="wrong_term" name="wrong_term" required>
+                </div>
+                <div class="col-md-6">
+                  <label for="correct_term" class="form-label">正确词汇（留空表示删除）</label>
+                  <input type="text" class="form-control" id="correct_term" name="correct_term">
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-success">添加规则</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="tab-pane fade" id="batch" role="tabpanel" aria-labelledby="batch-tab">
+              <form action="{{ url_for('terminology.batch_add_terminology') }}" method="post">
+                <div class="mb-3">
+                  <label for="batch_text" class="form-label">批量添加（每行格式：错误 -> 正确）</label>
+                  <textarea class="form-control" id="batch_text" name="batch_text" rows="6"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">批量添加</button>
+              </form>
+              <hr>
+              <div>
+                <a href="{{ url_for('terminology.export_terminology') }}" class="btn btn-outline-primary">导出字典</a>
+                <form action="{{ url_for('terminology.import_terminology') }}" method="post" enctype="multipart/form-data" class="d-inline">
+                  <input type="file" name="file" accept=".json" class="form-control d-inline-block w-auto" required>
+                  <button type="submit" class="btn btn-outline-secondary">导入字典</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="test" role="tabpanel" aria-labelledby="test-tab">
+              <form id="testForm" onsubmit="event.preventDefault(); testCorrection();">
+                <div class="mb-3">
+                  <label for="test_text" class="form-label">测试文本</label>
+                  <textarea class="form-control" id="test_text" rows="4" placeholder="输入要测试的文本..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">测试纠错</button>
+              </form>
+              <div id="test_result" class="alert alert-info mt-4 d-none">
+                <p><strong>原文:</strong> <span id="original_text"></span></p>
+                <p><strong>纠错后:</strong> <span id="corrected_text"></span></p>
+                <p><strong>状态:</strong> <span id="change_status"></span></p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 确保DOM完全加载后再初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 初始化Bootstrap tabs
+    var triggerTabList = [].slice.call(document.querySelectorAll('#mainTabs button'));
+    triggerTabList.forEach(function (triggerEl) {
+      var tabTrigger = new bootstrap.Tab(triggerEl);
+    });
+  });
+
+  function searchRules() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelectorAll('#rulesTable tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(filter) ? '' : 'none';
+    });
+  }
+
+  function deleteRule(wrongTerm) {
+    if (confirm(`确定要删除规则 "${wrongTerm}" 吗？`)) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '{{ url_for("terminology.delete_terminology") }}';
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'wrong_term';
+      input.value = wrongTerm;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+
+  function editRule(wrongTerm, correctTerm) {
+    const newWrong = prompt('错误词汇:', wrongTerm);
+    if (newWrong === null) return;
+    const newCorrect = prompt('正确词汇:', correctTerm);
+    if (newCorrect === null) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ url_for("terminology.edit_terminology") }}';
+    [['old_wrong_term', wrongTerm], ['new_wrong_term', newWrong], ['new_correct_term', newCorrect]].forEach(([name, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function testCorrection() {
+    const text = document.getElementById('test_text').value;
+    if (!text.trim()) return alert('请输入文本');
+    fetch('{{ url_for("terminology.test_terminology") }}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'test_text=' + encodeURIComponent(text)
+    })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('original_text').textContent = data.original;
+        document.getElementById('corrected_text').textContent = data.corrected;
+        document.getElementById('change_status').textContent = data.changed ? '已修改' : '无变化';
+        document.getElementById('test_result').classList.remove('d-none');
+      });
+  }
+</script>
+{% endblock %}

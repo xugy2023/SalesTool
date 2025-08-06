@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>添加客户</title>
+    <style>
+        body { font-family: sans-serif; padding: 2em; }
+        form { max-width: 600px; }
+        label { display: block; margin-top: 15px; }
+        input, textarea, select { width: 100%; padding: 8px; }
+        button { margin-top: 20px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h2>添加新客户</h2>
+    <form method="post" action="{{url_for('customers.add_customer')}}">
+        <label>客户名称：<input type="text" name="name" required></label>
+        <label>联系人：<input type="text" name="contact"></label>
+        <label>联系电话：<input type="text" name="phone"></label>
+        <label>公司名称：<input type="text" class="form-control" name="company" id="company" required></label>
+        <label>客户状态：
+            <select name="status">
+                <option value="有意向">有意向</option>
+                <option value="保持联系">保持联系</option>
+                <option value="无意向">无意向</option>
+            </select>
+        </label>
+        <label>行业：<input type="text" name="industry"></label>
+        <label>地区：<input type="text" name="region"></label>
+        <label>备注：<textarea name="notes" rows="4"></textarea></label>
+        <label>最近联系时间：<input type="text" name="last_contact" placeholder="如：2025-06-22"></label>
+        <button type="submit">提交</button>
+    </form>
+    <p><a href="/customers">返回客户列表</a></p>
+</body>
+</html>

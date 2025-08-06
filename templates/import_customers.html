@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+<head>
+  <meta charset="UTF-8">
+  <title>首页 - 智能销售辅助系统</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow border-0">
+        <div class="card-header bg-gradient bg-success text-white">
+          <h3 class="mb-0 fw-bold"><i class="bi bi-upload me-2"></i>导入客户数据</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="file" class="form-label fw-semibold">上传 Excel 文件</label>
+              <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls,.csv" required>
+              <div class="form-text">支持格式：.xlsx, .xls, .csv</div>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success btn-lg fw-bold">
+                <i class="bi bi-arrow-bar-up me-1"></i>开始导入
+              </button>
+            </div>
+          </form>
+          <hr>
+          <div class="mt-4">
+            <h5 class="fw-bold">📄 模板说明</h5>
+            <p class="text-muted">请确保上传的文件包含如下字段：客户姓名、通话日期、通话摘要、客户意向。点击下方按钮下载模板。</p>
+            <a href="/static/templates/customer_import_template.xlsx" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-download"></i> 下载导入模板
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
